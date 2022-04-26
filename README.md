@@ -23,6 +23,8 @@ We enforce hard limits on the storage space that a bot can consume.
 
 We keep track of the session keys for each bot in a MongoDB database.
 
+This backend can be used from [the respective storage adapter](https://github.com/grammyjs/storage-free).
+
 ## Development
 
 If you want to run this project locally, you can simply execute `deno run src/main.ts`.
