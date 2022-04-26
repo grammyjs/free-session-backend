@@ -25,7 +25,7 @@ We keep track of the session keys for each bot in a MongoDB database.
 
 ## Development
 
-If you want to run this project locally, you can simply execute `deno run srm/main.ts`.
+If you want to run this project locally, you can simply execute `deno run src/main.ts`.
 
 You will need to set a number of environment variables for this project to function.
 
