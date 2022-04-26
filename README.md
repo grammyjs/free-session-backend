@@ -2,7 +2,7 @@
 
 ---
 
-## Free Session Storage
+## Introduction
 
 This repo contains the backend setup which powers grammY's free sessions.
 It is hosted on Deno Deploy.
