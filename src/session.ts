@@ -51,7 +51,7 @@ export class S3SessionStore {
   private async get(key: string) {
     const response = await this.bucket.getObject(key);
     if (response === undefined) return undefined;
-    return response.body;
+    return await readCapped(response.body);
   }
 
   private async put(key: string, data: Uint8Array) {
@@ -81,7 +81,7 @@ export class S3SessionStore {
       });
     }
     const data = await readCapped(stream, MAX_SESSION_DATA_BYTES);
-    if (data === null) {
+    if (data === undefined) {
       return new Response(`data exceeds ${MAX_SESSION_DATA_BYTES} bytes`, {
         status: 400,
       });
@@ -119,13 +119,13 @@ export class S3SessionStore {
 
 async function readCapped(
   stream: ReadableStream<Uint8Array>,
-  maxBytes: number,
-): Promise<Uint8Array | null> {
+  maxBytes = Infinity,
+): Promise<Uint8Array | undefined> {
   let bytes = 0;
   const chunks: Uint8Array[] = [];
   for await (const chunk of stream) {
     bytes += chunk.byteLength;
-    if (bytes >= maxBytes) return null;
+    if (bytes >= maxBytes) return undefined;
     else chunks.push(chunk);
   }
   return join(chunks, bytes);
