@@ -80,7 +80,7 @@ export class S3SessionStore {
         status: 400,
       });
     }
-    const data = readCapped(stream, MAX_SESSION_DATA_BYTES);
+    const data = await readCapped(stream, MAX_SESSION_DATA_BYTES);
     if (data === null) {
       return new Response(`data exceeds ${MAX_SESSION_DATA_BYTES} bytes`, {
         status: 400,
