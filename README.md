@@ -1,4 +1,4 @@
-# <h1 align="center">grammY Free Session</h1>
+# <h1 align="center">grammY Free Sessions</h1>
 
 ---
 
