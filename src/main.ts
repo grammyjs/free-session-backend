@@ -29,7 +29,7 @@ await storage.init();
 async function handler(req: Request): Promise<Response> {
   const [, path, ...keyParts] = new URL(req.url).pathname.split("/");
   switch (path) {
-    case "login": { // POST /token: generates a new login token
+    case "login": { // POST /login: generates a new login token
       let token: unknown;
       try {
         const json = await req.json();
