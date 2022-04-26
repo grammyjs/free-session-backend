@@ -21,7 +21,10 @@ export async function login(token: unknown) {
   try {
     const me = await api.getMe();
     const token = await jwt.signToken(me.id);
-    return new Response(JSON.stringify({ token }), { status: 201 });
+    return new Response(JSON.stringify({ token }), {
+      headers: { "content-type": "application/json" },
+      status: 201,
+    });
   } catch {
     return new Response("invalid bot token", { status: 401 });
   }
