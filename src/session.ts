@@ -1,7 +1,8 @@
 import { S3, S3Bucket } from "https://deno.land/x/s3@0.5.0/mod.ts";
 
 // hard storage limits
-const MAX_SESSION_BYTES = 16 * 1024; // max 16 KiB per session
+const MAX_SESSION_KEY_LENGTH = 64; // UTF-16 code units
+const MAX_SESSION_DATA_BYTES = 16 * 1024; // max 16 KiB per session
 const MAX_SESSION_COUNT = 50_000; // max 50,000 sessions per bot
 
 import {
@@ -71,8 +72,13 @@ export class S3SessionStore {
 
   async writeSession(id: number, key: string, data: string) {
     if (this.stats === undefined) throw new Error("not inited");
-    if (data.length >= MAX_SESSION_BYTES) {
-      return new Response(`data exceeds ${MAX_SESSION_BYTES} bytes`, {
+    if (key.length >= MAX_SESSION_KEY_LENGTH) {
+      return new Response(`key lengths exceeds ${MAX_SESSION_KEY_LENGTH}`, {
+        status: 400,
+      });
+    }
+    if (data.length >= MAX_SESSION_DATA_BYTES) {
+      return new Response(`data exceeds ${MAX_SESSION_DATA_BYTES} bytes`, {
         status: 400,
       });
     }
