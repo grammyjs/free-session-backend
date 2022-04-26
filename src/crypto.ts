@@ -15,12 +15,16 @@ export class Jwt {
   async verifyToken(
     token: string,
   ): Promise<number | false> {
-    const data: Record<string, unknown> = await verify(token, this.key);
-    return typeof data === "object" &&
-      data !== null &&
-      "id" in data &&
-      typeof data.id === "number" &&
-      data.id;
+    try {
+      const data: Record<string, unknown> = await verify(token, this.key);
+      return typeof data === "object" &&
+        data !== null &&
+        "id" in data &&
+        typeof data.id === "number" &&
+        data.id;
+    } catch {
+      return false;
+    }
   }
 }
 
