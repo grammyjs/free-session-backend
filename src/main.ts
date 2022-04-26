@@ -27,6 +27,13 @@ const storage = new S3SessionStore({
 await storage.init();
 
 async function handler(req: Request): Promise<Response> {
+  // Redirect all browsers to main page
+  if (req.headers.get("Accept")?.split(",").includes("text/html")) {
+    const response = new Response(null, { status: 301 });
+    response.headers.set("Location", "https://grammy.dev");
+    return response;
+  }
+  // Handle API requests
   const [, path, ...keyParts] = new URL(req.url).pathname.split("/");
   switch (path) {
     case "login": { // POST /login: generates a new login token
