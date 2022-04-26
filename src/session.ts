@@ -24,6 +24,8 @@ interface BotStats {
   keys: string[];
 }
 
+const headers = { "content-type": "application/json" };
+
 export class S3SessionStore {
   private stats: Collection<BotStats> | undefined;
   private readonly bucket: S3Bucket;
@@ -76,15 +78,13 @@ export class S3SessionStore {
   ) {
     if (this.stats === undefined) throw new Error("not inited");
     if (key.length >= MAX_SESSION_KEY_LENGTH) {
-      return new Response(`key lengths exceeds ${MAX_SESSION_KEY_LENGTH}`, {
-        status: 400,
-      });
+      const err = { error: `key lengths exceeds ${MAX_SESSION_KEY_LENGTH}` };
+      return new Response(JSON.stringify(err), { headers, status: 400 });
     }
     const data = await readCapped(stream, MAX_SESSION_DATA_BYTES);
     if (data === undefined) {
-      return new Response(`data exceeds ${MAX_SESSION_DATA_BYTES} bytes`, {
-        status: 400,
-      });
+      const err = { error: `data exceeds ${MAX_SESSION_DATA_BYTES} bytes` };
+      return new Response(JSON.stringify(err), { headers, status: 400 });
     }
     const _id = id.toString();
     // We store one document per bot, containing an array withouth duplicates
@@ -100,7 +100,10 @@ export class S3SessionStore {
     );
     const canWrite = matchedCount > 0;
     if (!canWrite) {
-      return new Response("max session count reached", { status: 409 });
+      return new Response(
+        JSON.stringify({ error: "max session count reached" }),
+        { headers, status: 409 },
+      );
     }
     await this.put(this.key(id, key), data);
     return new Response(null, { status: 204 });

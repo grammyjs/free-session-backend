@@ -26,6 +26,8 @@ const storage = new S3SessionStore({
 });
 await storage.init();
 
+const headers = { "content-type": "application/json" };
+
 async function handler(req: Request): Promise<Response> {
   // Redirect all browsers to main page
   if (req.headers.get("Accept")?.split(",").includes("text/html")) {
@@ -41,14 +43,23 @@ async function handler(req: Request): Promise<Response> {
       try {
         const json = await req.json();
         token = json.token;
-      } catch {
-        return new Response("invalid or missing json body", { status: 400 });
+      } catch (e) {
+        console.error(e);
+        return new Response(
+          JSON.stringify({ error: "invalid or missing json body" }),
+          { headers, status: 400 },
+        );
       }
       return await login(token);
     }
     case "session": {
       const result = await auth(req.headers.get("Authorization"));
-      if (!result.ok) return new Response("unauthorized", { status: 401 });
+      if (!result.ok) {
+        return new Response(JSON.stringify({ error: "unauthorized" }), {
+          headers,
+          status: 401,
+        });
+      }
       const id = result.id;
       const key = keyParts.join("/");
       switch (req.method) {
@@ -57,7 +68,10 @@ async function handler(req: Request): Promise<Response> {
         case "POST": { // POST /session: writes session data for key
           const data = req.body;
           if (data === null) {
-            return new Response("missing body", { status: 400 });
+            return new Response(JSON.stringify({ error: "missing body" }), {
+              headers,
+              status: 400,
+            });
           }
           return await storage.writeSession(id, key, data);
         }
@@ -67,7 +81,10 @@ async function handler(req: Request): Promise<Response> {
     }
     // fallthrough
     default:
-      return new Response("not found", { status: 404 });
+      return new Response(JSON.stringify({ error: "not found" }), {
+        headers,
+        status: 404,
+      });
   }
 }
 

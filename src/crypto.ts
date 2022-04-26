@@ -22,7 +22,8 @@ export class Jwt {
         "id" in data &&
         typeof data.id === "number" &&
         data.id;
-    } catch {
+    } catch (e) {
+      console.error(e);
       return false;
     }
   }

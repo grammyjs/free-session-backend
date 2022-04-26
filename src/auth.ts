@@ -8,25 +8,32 @@ if (!env) {
   throw new Error(msg);
 }
 
+const headers = { "content-type": "application/json" };
+
 const key = await importKey(env);
 const jwt = new Jwt(key);
 
 export async function login(token: unknown) {
   if (typeof token !== "string" || !token) {
-    return new Response("expected token string in request body", {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ error: "expected token string in request body" }),
+      { headers, status: 400 },
+    );
   }
   const api = new Api(token);
   try {
     const me = await api.getMe();
     const token = await jwt.signToken(me.id);
     return new Response(JSON.stringify({ token }), {
-      headers: { "content-type": "application/json" },
+      headers,
       status: 201,
     });
-  } catch {
-    return new Response("invalid bot token", { status: 401 });
+  } catch (e) {
+    console.error(e);
+    return new Response(JSON.stringify({ error: "invalid bot token" }), {
+      headers,
+      status: 401,
+    });
   }
 }
 
