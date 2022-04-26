@@ -1,3 +1,4 @@
+import { copy } from "https://deno.land/std@0.136.0/bytes/mod.ts";
 import { S3, S3Bucket } from "https://deno.land/x/s3@0.5.0/mod.ts";
 
 // hard storage limits
@@ -9,8 +10,6 @@ import {
   type Collection,
   MongoClient,
 } from "https://deno.land/x/mongo@v0.29.4/mod.ts";
-
-const enc = new TextEncoder();
 
 interface StoreConfig {
   s3AccessKey: string;
@@ -52,11 +51,11 @@ export class S3SessionStore {
   private async get(key: string) {
     const response = await this.bucket.getObject(key);
     if (response === undefined) return undefined;
-    return await new Response(response.body).text();
+    return response.body;
   }
 
-  private async put(key: string, data: string) {
-    await this.bucket.putObject(key, enc.encode(data));
+  private async put(key: string, data: Uint8Array) {
+    await this.bucket.putObject(key, data);
   }
 
   private async delete(key: string) {
@@ -70,14 +69,19 @@ export class S3SessionStore {
       : new Response(session, { status: 200 });
   }
 
-  async writeSession(id: number, key: string, data: string) {
+  async writeSession(
+    id: number,
+    key: string,
+    stream: ReadableStream<Uint8Array>,
+  ) {
     if (this.stats === undefined) throw new Error("not inited");
     if (key.length >= MAX_SESSION_KEY_LENGTH) {
       return new Response(`key lengths exceeds ${MAX_SESSION_KEY_LENGTH}`, {
         status: 400,
       });
     }
-    if (data.length >= MAX_SESSION_DATA_BYTES) {
+    const data = readCapped(stream, MAX_SESSION_DATA_BYTES);
+    if (data === null) {
       return new Response(`data exceeds ${MAX_SESSION_DATA_BYTES} bytes`, {
         status: 400,
       });
@@ -111,4 +115,25 @@ export class S3SessionStore {
     ]);
     return new Response(null, { status: 204 });
   }
+}
+
+async function readCapped(
+  stream: ReadableStream<Uint8Array>,
+  maxBytes: number,
+): Promise<Uint8Array | null> {
+  let bytes = 0;
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of stream) {
+    bytes += chunk.byteLength;
+    if (bytes >= maxBytes) return null;
+    else chunks.push(chunk);
+  }
+  return join(chunks, bytes);
+}
+
+function join(chunks: Uint8Array[], bytes: number) {
+  let off = 0;
+  const buf = new Uint8Array(bytes);
+  for (const chunk of chunks) off += copy(chunk, buf, off);
+  return buf;
 }

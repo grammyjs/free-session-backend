@@ -44,11 +44,13 @@ async function handler(req: Request): Promise<Response> {
       if (!result.ok) return new Response("unauthorized", { status: 401 });
       const id = result.id;
       const key = keyParts.join("/");
+      const data = req.body;
+      if (data === null) return new Response("missing body", { status: 400 });
       switch (req.method) {
         case "GET": // GET /session: reads session data for key
           return storage.readSession(id, key);
         case "POST": // POST /session: writes session data for key
-          return storage.writeSession(id, key, await req.text());
+          return storage.writeSession(id, key, data);
         case "DELETE": // DELETE /session: deletes session data for key
           return storage.deleteSession(id, key);
       }
