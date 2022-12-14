@@ -36,7 +36,13 @@ async function handler(req: Request): Promise<Response> {
     return response;
   }
   // Handle API requests
-  const [, path, ...keyParts] = new URL(req.url).pathname.split("/");
+  const [, slug, path, ...keyParts] = new URL(req.url).pathname.split("/");
+  if (slug !== "api") {
+    return new Response(JSON.stringify({ error: "not found" }), {
+      headers,
+      status: 404,
+    });
+  }
   switch (path) {
     case "login": { // POST /login: generates a new login token
       let token: unknown;
