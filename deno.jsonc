@@ -1,3 +1,3 @@
 {
-  "fmt": { "options": { "proseWrap": "preserve" } }
+  "fmt": { "proseWrap": "preserve" }
 }
