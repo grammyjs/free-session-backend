@@ -118,6 +118,16 @@ export class S3SessionStore {
     ]);
     return new Response(null, { status: 204 });
   }
+
+  async readSessionsKeys(id: number) {
+    if (this.stats === undefined) throw new Error("not inited");
+    const _id = id.toString();
+    const doc = await this.stats.findOne({ _id });
+    return new Response(JSON.stringify({ keys: doc?.keys ?? [] }), {
+      headers,
+      status: 200,
+    });
+  }
 }
 
 async function readCapped(

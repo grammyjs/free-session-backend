@@ -70,7 +70,11 @@ async function handler(req: Request): Promise<Response> {
       const key = keyParts.join("/");
       switch (req.method) {
         case "GET": // GET /session: reads session data for key
-          return await storage.readSession(id, key);
+          if (key.trim() === "") {
+            return await storage.readSessionsKeys(id);
+          } else {
+            return await storage.readSession(id, key);
+          }
         case "POST": { // POST /session: writes session data for key
           const data = req.body;
           if (data === null) {
