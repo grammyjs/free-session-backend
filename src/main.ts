@@ -70,11 +70,7 @@ async function handler(req: Request): Promise<Response> {
       const key = keyParts.join("/");
       switch (req.method) {
         case "GET": // GET /session: reads session data for key
-          if (key.trim() === "") {
-            return await storage.readSessionsKeys(id);
-          } else {
-            return await storage.readSession(id, key);
-          }
+          return await storage.readSession(id, key);
         case "POST": { // POST /session: writes session data for key
           const data = req.body;
           if (data === null) {
@@ -87,6 +83,26 @@ async function handler(req: Request): Promise<Response> {
         }
         case "DELETE": // DELETE /session: deletes session data for key
           return await storage.deleteSession(id, key);
+      }
+    }
+
+    case "sessions": {
+      const result = await auth(req.headers.get("Authorization"));
+      if (!result.ok) {
+        return new Response(JSON.stringify({ error: "unauthorized" }), {
+          headers,
+          status: 401,
+        });
+      }
+      const id = result.id;
+      switch (req.method) {
+        case "GET": // GET /sessions: reads all keys of all sessions
+          return await storage.readSessionKeys(id);
+        default:
+          return new Response(JSON.stringify({ error: "not found" }), {
+            headers,
+            status: 404,
+          });
       }
     }
     // fallthrough
