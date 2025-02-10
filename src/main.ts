@@ -85,6 +85,26 @@ async function handler(req: Request): Promise<Response> {
           return await storage.deleteSession(id, key);
       }
     }
+
+    case "sessions": {
+      const result = await auth(req.headers.get("Authorization"));
+      if (!result.ok) {
+        return new Response(JSON.stringify({ error: "unauthorized" }), {
+          headers,
+          status: 401,
+        });
+      }
+      const id = result.id;
+      switch (req.method) {
+        case "GET": // GET /sessions: reads all keys of all sessions
+          return await storage.readSessionKeys(id);
+        default:
+          return new Response(JSON.stringify({ error: "not found" }), {
+            headers,
+            status: 404,
+          });
+      }
+    }
     // fallthrough
     default:
       return new Response(JSON.stringify({ error: "not found" }), {
