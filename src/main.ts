@@ -104,9 +104,9 @@ async function handler(req: Request): Promise<Response> {
         case "GET": // GET /sessions: reads all keys of all sessions
           return await storage.readSessionKeys(id);
         default:
-          return new Response(JSON.stringify({ error: "not found" }), {
+          return new Response(JSON.stringify({ error: "method not allowed" }), {
             headers,
-            status: 404,
+            status: 405,
           });
       }
     }
