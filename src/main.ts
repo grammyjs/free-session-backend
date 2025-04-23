@@ -84,9 +84,13 @@ async function handler(req: Request): Promise<Response> {
         }
         case "DELETE": // DELETE /session: deletes session data for key
           return await storage.deleteSession(id, key);
+        default:
+          return new Response(JSON.stringify({ error: "method not allowed" }), {
+            headers,
+            status: 405,
+          });
       }
     }
-    // fallthrough
     case "sessions": {
       const result = await auth(req.headers.get("Authorization"));
       if (!result.ok) {
