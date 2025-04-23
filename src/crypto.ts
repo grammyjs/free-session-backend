@@ -1,5 +1,5 @@
 // import jwt from "jsonwebtoken";
-import { create, verify } from "https://deno.land/x/djwt@v2.4/mod.ts";
+import { create, verify } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
 
 export class Jwt {
   constructor(private readonly key: CryptoKey) {}
