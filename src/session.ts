@@ -8,7 +8,7 @@ const MAX_SESSION_COUNT = 50_000; // max 50,000 sessions per bot
 import {
   type Collection,
   MongoClient,
-} from "https://deno.land/x/mongo@v0.34.0/mod.ts";
+} from "https://deno.land/x/mongo@v0.29.4/mod.ts";
 
 interface StoreConfig {
   s3AccessKey: string;
