@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.136.0/http/server.ts";
 import { S3SessionStore } from "./session.ts";
 import { auth, login } from "./auth.ts";
 
@@ -44,7 +43,8 @@ async function handler(req: Request): Promise<Response> {
     });
   }
   switch (path) {
-    case "login": { // POST /login: generates a new login token
+    case "login": {
+      // POST /login: generates a new login token
       let token: unknown;
       try {
         const json = await req.json();
@@ -71,7 +71,8 @@ async function handler(req: Request): Promise<Response> {
       switch (req.method) {
         case "GET": // GET /session: reads session data for key
           return await storage.readSession(id, key);
-        case "POST": { // POST /session: writes session data for key
+        case "POST": {
+          // POST /session: writes session data for key
           const data = req.body;
           if (data === null) {
             return new Response(JSON.stringify({ error: "missing body" }), {
@@ -83,9 +84,13 @@ async function handler(req: Request): Promise<Response> {
         }
         case "DELETE": // DELETE /session: deletes session data for key
           return await storage.deleteSession(id, key);
+        default:
+          return new Response(JSON.stringify({ error: "method not allowed" }), {
+            headers,
+            status: 405,
+          });
       }
     }
-
     case "sessions": {
       const result = await auth(req.headers.get("Authorization"));
       if (!result.ok) {
@@ -99,9 +104,9 @@ async function handler(req: Request): Promise<Response> {
         case "GET": // GET /sessions: reads all keys of all sessions
           return await storage.readSessionKeys(id);
         default:
-          return new Response(JSON.stringify({ error: "not found" }), {
+          return new Response(JSON.stringify({ error: "method not allowed" }), {
             headers,
-            status: 404,
+            status: 405,
           });
       }
     }
@@ -114,4 +119,4 @@ async function handler(req: Request): Promise<Response> {
   }
 }
 
-await serve(handler, { port: 8080 });
+Deno.serve({ port: 8080 }, handler);

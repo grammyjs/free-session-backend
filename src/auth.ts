@@ -1,4 +1,4 @@
-import { Api } from "https://deno.land/x/grammy@v1.8.0/mod.ts";
+import { Api } from "https://deno.land/x/grammy@v1.36.1/mod.ts";
 import { importKey, Jwt } from "./crypto.ts";
 
 const env = Deno.env.get("SECRET_KEY");
